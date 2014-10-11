@@ -10,8 +10,8 @@ import UIKit
 
 class TableViewCell: UITableViewCell {
 
-    @IBOutlet var mainImageView: UIImageView
-    @IBOutlet var nameLabel: UILabel
+    @IBOutlet var mainImageView: UIImageView!
+    @IBOutlet var nameLabel: UILabel!
    
     override func awakeFromNib() {
         super.awakeFromNib()
@@ -21,7 +21,7 @@ class TableViewCell: UITableViewCell {
 
         let clip: CGImageRef! = CGImageCreateWithImageInRect(image.CGImage, self.frame)
         let clippedImage = UIImage(CGImage: clip)
-        CGImageRelease(clip)
+        //CGImageRelease(clip)
         
         self.mainImageView.image = clippedImage;
     }

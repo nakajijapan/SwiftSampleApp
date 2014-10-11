@@ -37,13 +37,13 @@ class TableViewController: UITableViewController {
                     options: NSJSONReadingOptions.MutableContainers,
                     error: nil) as NSDictionary
                 
-                var items = json.objectForKey("items") as NSArray
+                var items = json.objectForKey("items") as Array<Dictionary<String, AnyObject>> // as NSArray
                 
-                for item:NSDictionary! in items {
+                for item in items {
                     self.data.addObject(item)
                 }
                     
-                self.currentPage = json.objectForKey("paginator").objectForKey("current_page") as Int
+                self.currentPage = json.objectForKey("paginator")!.objectForKey("current_page") as Int
                 println("current page = \(self.currentPage)")
                 
                 
@@ -53,7 +53,7 @@ class TableViewController: UITableViewController {
     }
     
     // UIScrollViewDelegate
-    override func scrollViewDidScroll(scrollView: UIScrollView!) {
+    override func scrollViewDidScroll(scrollView: UIScrollView) {
 
         // bottom?
         if self.tableView.contentOffset.y >= (self.tableView.contentSize.height - self.tableView.bounds.size.height) {
@@ -82,24 +82,24 @@ class TableViewController: UITableViewController {
     }
 
     // UITableViewDataSource, UITableViewDelegate
-    override func tableView(tableView: UITableView!, sectionForSectionIndexTitle title: String!, atIndex index: Int) -> Int  {
+    override func tableView(tableView: UITableView, sectionForSectionIndexTitle title: String, atIndex index: Int) -> Int  {
         return 0
     }
     
-    override func tableView(tableView: UITableView!, numberOfRowsInSection section: Int) -> Int {
+    override func tableView(tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         return self.data.count
     }
     
-    override func tableView(tableView: UITableView!, titleForHeaderInSection section: Int) -> String! {
+    override func tableView(tableView: UITableView, titleForHeaderInSection section: Int) -> String {
         return ""
     }
     
-    override func tableView(tableView: UITableView!, cellForRowAtIndexPath indexPath: NSIndexPath!) -> UITableViewCell! {
+    override func tableView(tableView: UITableView, cellForRowAtIndexPath indexPath: NSIndexPath) -> UITableViewCell {
 
         var cell: TableViewCell = self.tableView.dequeueReusableCellWithIdentifier("Cell") as TableViewCell
         
         cell.mainImageView.image = nil
-        cell.nameLabel.text      = self.data!.objectAtIndex(indexPath.row)!.objectForKey("title") as String
+        cell.nameLabel.text      = (self.data!.objectAtIndex(indexPath.row).objectForKey("title") as String)
 
         var q_global: dispatch_queue_t = dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0);
         var q_main: dispatch_queue_t   = dispatch_get_main_queue();
