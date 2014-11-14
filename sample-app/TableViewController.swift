@@ -11,8 +11,8 @@ import UIKit
 
 class TableViewController: UITableViewController {
     
-    var data:NSMutableArray! = NSMutableArray()
-    var loading:Bool!        = false
+    var data:NSMutableArray  = NSMutableArray()
+    var loading:Bool         = false
     var currentPage:Int      = 1
 
     override func viewDidLoad() {
@@ -23,32 +23,27 @@ class TableViewController: UITableViewController {
     
     func reloadData(page: Int) {
 
-        let url            = NSURL(string:"http://frustration.me/api/public_timeline?page=\(page)")
+        let url            = NSURL(string:"http://frustration.me/api/public_timeline?page=\(page)")!
         let request        = NSURLRequest(URL: url)
-        let uridata:NSData = NSData(contentsOfURL: url)
-        
-        var error: NSError!
-        NSURLConnection.sendAsynchronousRequest(
-            request,
-            queue: NSOperationQueue.mainQueue(),
-            completionHandler:{ (response: NSURLResponse!, data: NSData!, error: NSError!) -> Void in
-                var json = NSJSONSerialization.JSONObjectWithData(
-                    data,
-                    options: NSJSONReadingOptions.MutableContainers,
-                    error: nil) as NSDictionary
-                
-                var items = json.objectForKey("items") as Array<Dictionary<String, AnyObject>> // as NSArray
-                
-                for item in items {
-                    self.data.addObject(item)
-                }
-                    
-                self.currentPage = json.objectForKey("paginator")!.objectForKey("current_page") as Int
-                println("current page = \(self.currentPage)")
-                
-                
-                self.tableView.reloadData()
-            })
+
+         NSURLConnection.sendAsynchronousRequest(request, queue: NSOperationQueue.mainQueue()) { (response: NSURLResponse!, data: NSData!, error: NSError!) -> Void in
+
+            var json = NSJSONSerialization.JSONObjectWithData(
+                data,
+                options: NSJSONReadingOptions.MutableContainers,
+                error: nil) as NSDictionary
+
+            var items = json.objectForKey("items") as Array<Dictionary<String, AnyObject>> // as NSArray
+
+            for item in items {
+                self.data.addObject(item)
+            }
+
+            self.currentPage = json.objectForKey("paginator")!.objectForKey("current_page") as Int
+            println("current page = \(self.currentPage)")
+
+            self.tableView.reloadData()
+        }
 
     }
     
@@ -64,17 +59,19 @@ class TableViewController: UITableViewController {
             if self.loading == true {
                 return
             }
-            
+
+            self.loading = true
+
             dispatch_async(q_global, {
-                
+
                 self.loading = true
                 self.reloadData(self.currentPage + 1)
 
                 dispatch_async(q_main, {
-                    
+
                     self.loading = false
                     println("end")
-                    
+
                     })
                 })
 
@@ -99,7 +96,7 @@ class TableViewController: UITableViewController {
         var cell: TableViewCell = self.tableView.dequeueReusableCellWithIdentifier("Cell") as TableViewCell
         
         cell.mainImageView.image = nil
-        cell.nameLabel.text      = (self.data!.objectAtIndex(indexPath.row).objectForKey("title") as String)
+        cell.nameLabel.text      = (self.data.objectAtIndex(indexPath.row).objectForKey("title") as String)
 
         var q_global: dispatch_queue_t = dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0);
         var q_main: dispatch_queue_t   = dispatch_get_main_queue();
@@ -107,9 +104,9 @@ class TableViewController: UITableViewController {
         
         dispatch_async(q_global, {
             var url               = self.data.objectAtIndex(indexPath.row).objectForKey("image_l") as String
-            var imageURL: NSURL   = NSURL.URLWithString(url)
-            var imageData: NSData = NSData(contentsOfURL: imageURL)
-            var image = self.resizeImage(UIImage(data: imageData), rect: CGRect(x: 0, y: 0, width: cell.frame.size.width, height: cell.frame.size.height))
+            var imageURL: NSURL   = NSURL(string: url)!
+            var imageData: NSData = NSData(contentsOfURL: imageURL)!
+            var image = self.resizeImage(UIImage(data: imageData)!, rect: CGRect(x: 0, y: 0, width: cell.frame.size.width, height: cell.frame.size.height))
             
             dispatch_async(q_main, {
                 
