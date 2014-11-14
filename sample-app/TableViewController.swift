@@ -43,6 +43,7 @@ class TableViewController: UITableViewController {
             println("current page = \(self.currentPage)")
 
             self.tableView.reloadData()
+            self.loading = false
         }
 
     }
@@ -64,12 +65,10 @@ class TableViewController: UITableViewController {
 
             dispatch_async(q_global, {
 
-                self.loading = true
                 self.reloadData(self.currentPage + 1)
 
                 dispatch_async(q_main, {
 
-                    self.loading = false
                     println("end")
 
                     })
