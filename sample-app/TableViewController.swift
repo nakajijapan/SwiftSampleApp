@@ -6,7 +6,6 @@
 //  Copyright (c) 2014年 net.nakajijapan. All rights reserved.
 //
 
-//TableViewController
 import UIKit
 
 class TableViewController: UITableViewController {
@@ -31,15 +30,15 @@ class TableViewController: UITableViewController {
             var json = NSJSONSerialization.JSONObjectWithData(
                 data,
                 options: NSJSONReadingOptions.MutableContainers,
-                error: nil) as NSDictionary
+                error: nil) as! NSDictionary
 
-            var items = json.objectForKey("items") as Array<Dictionary<String, AnyObject>> // as NSArray
+            var items = json["items"] as! Array<Dictionary<String, AnyObject>> // as NSArray
 
             for item in items {
                 self.data.addObject(item)
             }
 
-            self.currentPage = json.objectForKey("paginator")!.objectForKey("current_page") as Int
+            self.currentPage = json.objectForKey("paginator")!.objectForKey("current_page") as! Int
             println("current page = \(self.currentPage)")
 
             self.tableView.reloadData()
@@ -48,7 +47,8 @@ class TableViewController: UITableViewController {
 
     }
     
-    // UIScrollViewDelegate
+    // MARK: - UIScrollViewDelegate
+
     override func scrollViewDidScroll(scrollView: UIScrollView) {
 
         // bottom?
@@ -77,7 +77,8 @@ class TableViewController: UITableViewController {
         }
     }
 
-    // UITableViewDataSource, UITableViewDelegate
+    // MARK: - UITableViewDataSource
+
     override func tableView(tableView: UITableView, sectionForSectionIndexTitle title: String, atIndex index: Int) -> Int  {
         return 0
     }
@@ -86,24 +87,20 @@ class TableViewController: UITableViewController {
         return self.data.count
     }
     
-    override func tableView(tableView: UITableView, titleForHeaderInSection section: Int) -> String {
-        return ""
-    }
-    
     override func tableView(tableView: UITableView, cellForRowAtIndexPath indexPath: NSIndexPath) -> UITableViewCell {
 
-        var cell: TableViewCell = self.tableView.dequeueReusableCellWithIdentifier("Cell") as TableViewCell
+        var cell: TableViewCell = self.tableView.dequeueReusableCellWithIdentifier("Cell") as! TableViewCell
         
         cell.mainImageView.image = nil
-        cell.nameLabel.text      = (self.data.objectAtIndex(indexPath.row).objectForKey("title") as String)
+        cell.nameLabel.text      = self.data[indexPath.row]["title"] as? String
 
         var q_global: dispatch_queue_t = dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0);
         var q_main: dispatch_queue_t   = dispatch_get_main_queue();
         
         
         dispatch_async(q_global, {
-            var url               = self.data.objectAtIndex(indexPath.row).objectForKey("image_l") as String
-            var imageURL: NSURL   = NSURL(string: url)!
+            var stringURL         = self.data[indexPath.row]["image_l"] as! String
+            var imageURL: NSURL   = NSURL(string: stringURL)!
             var imageData: NSData = NSData(contentsOfURL: imageURL)!
             var image = self.resizeImage(UIImage(data: imageData)!, rect: CGRect(x: 0, y: 0, width: cell.frame.size.width, height: cell.frame.size.height))
             
@@ -119,7 +116,11 @@ class TableViewController: UITableViewController {
         return cell;
     }
     
-    // Private
+    override func tableView(tableView: UITableView, titleForHeaderInSection section: Int) -> String {
+        return ""
+    }
+    
+    // MARK: - Private
     func resizeImage(image: UIImage, rect: CGRect) -> UIImage {
 
         UIGraphicsBeginImageContext(rect.size);
