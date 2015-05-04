@@ -18,11 +18,8 @@ class TableViewCell: UITableViewCell {
     }
     
     func setBackGroundImage(image: UIImage) {
-
         let clip: CGImageRef! = CGImageCreateWithImageInRect(image.CGImage, self.frame)
         let clippedImage = UIImage(CGImage: clip)
-        //CGImageRelease(clip)
-        
         self.mainImageView.image = clippedImage;
     }
     

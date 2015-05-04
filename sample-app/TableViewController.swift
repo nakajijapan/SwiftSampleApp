@@ -6,7 +6,6 @@
 //  Copyright (c) 2014年 net.nakajijapan. All rights reserved.
 //
 
-//TableViewController
 import UIKit
 
 class TableViewController: UITableViewController {
@@ -48,7 +47,8 @@ class TableViewController: UITableViewController {
 
     }
     
-    // UIScrollViewDelegate
+    // MARK: - UIScrollViewDelegate
+
     override func scrollViewDidScroll(scrollView: UIScrollView) {
 
         // bottom?
@@ -77,17 +77,14 @@ class TableViewController: UITableViewController {
         }
     }
 
-    // UITableViewDataSource, UITableViewDelegate
+    // MARK: - UITableViewDataSource
+
     override func tableView(tableView: UITableView, sectionForSectionIndexTitle title: String, atIndex index: Int) -> Int  {
         return 0
     }
     
     override func tableView(tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         return self.data.count
-    }
-    
-    override func tableView(tableView: UITableView, titleForHeaderInSection section: Int) -> String {
-        return ""
     }
     
     override func tableView(tableView: UITableView, cellForRowAtIndexPath indexPath: NSIndexPath) -> UITableViewCell {
@@ -119,7 +116,11 @@ class TableViewController: UITableViewController {
         return cell;
     }
     
-    // Private
+    override func tableView(tableView: UITableView, titleForHeaderInSection section: Int) -> String {
+        return ""
+    }
+    
+    // MARK: - Private
     func resizeImage(image: UIImage, rect: CGRect) -> UIImage {
 
         UIGraphicsBeginImageContext(rect.size);
