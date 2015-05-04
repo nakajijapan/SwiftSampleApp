@@ -32,7 +32,7 @@ class TableViewController: UITableViewController {
                 options: NSJSONReadingOptions.MutableContainers,
                 error: nil) as! NSDictionary
 
-            var items = json.objectForKey("items") as! Array<Dictionary<String, AnyObject>> // as NSArray
+            var items = json["items"] as! Array<Dictionary<String, AnyObject>> // as NSArray
 
             for item in items {
                 self.data.addObject(item)
