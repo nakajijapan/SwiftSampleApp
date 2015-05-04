@@ -31,15 +31,15 @@ class TableViewController: UITableViewController {
             var json = NSJSONSerialization.JSONObjectWithData(
                 data,
                 options: NSJSONReadingOptions.MutableContainers,
-                error: nil) as NSDictionary
+                error: nil) as! NSDictionary
 
-            var items = json.objectForKey("items") as Array<Dictionary<String, AnyObject>> // as NSArray
+            var items = json.objectForKey("items") as! Array<Dictionary<String, AnyObject>> // as NSArray
 
             for item in items {
                 self.data.addObject(item)
             }
 
-            self.currentPage = json.objectForKey("paginator")!.objectForKey("current_page") as Int
+            self.currentPage = json.objectForKey("paginator")!.objectForKey("current_page") as! Int
             println("current page = \(self.currentPage)")
 
             self.tableView.reloadData()
@@ -92,17 +92,17 @@ class TableViewController: UITableViewController {
     
     override func tableView(tableView: UITableView, cellForRowAtIndexPath indexPath: NSIndexPath) -> UITableViewCell {
 
-        var cell: TableViewCell = self.tableView.dequeueReusableCellWithIdentifier("Cell") as TableViewCell
+        var cell: TableViewCell = self.tableView.dequeueReusableCellWithIdentifier("Cell") as! TableViewCell
         
         cell.mainImageView.image = nil
-        cell.nameLabel.text      = (self.data.objectAtIndex(indexPath.row).objectForKey("title") as String)
+        cell.nameLabel.text      = (self.data.objectAtIndex(indexPath.row).objectForKey("title") as! String)
 
         var q_global: dispatch_queue_t = dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0);
         var q_main: dispatch_queue_t   = dispatch_get_main_queue();
         
         
         dispatch_async(q_global, {
-            var url               = self.data.objectAtIndex(indexPath.row).objectForKey("image_l") as String
+            var url               = self.data.objectAtIndex(indexPath.row).objectForKey("image_l")as! String
             var imageURL: NSURL   = NSURL(string: url)!
             var imageData: NSData = NSData(contentsOfURL: imageURL)!
             var image = self.resizeImage(UIImage(data: imageData)!, rect: CGRect(x: 0, y: 0, width: cell.frame.size.width, height: cell.frame.size.height))
