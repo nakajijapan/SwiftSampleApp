@@ -19,7 +19,6 @@ class DetailViewController: UIViewController {
         self.itemImageView.image = nil
         
         let q_global: dispatch_queue_t = dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0);
-        let q_main: dispatch_queue_t   = dispatch_get_main_queue();
         
         dispatch_async(q_global, {
             let stringURL = self.item["image_l"] as! String
@@ -27,7 +26,7 @@ class DetailViewController: UIViewController {
             let imageData = NSData(contentsOfURL: imageURL)!
             let image = UIImage(data: imageData)!
             
-            dispatch_async(q_main, {
+            dispatch_async(dispatch_get_main_queue(), {
                 self.itemImageView.image = image
             })
             

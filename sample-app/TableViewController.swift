@@ -12,38 +12,38 @@ class TableViewController: UITableViewController {
     
     var data:NSMutableArray  = NSMutableArray()
     var loading:Bool         = false
-    var currentPage:Int      = 1
+    var currentPage:Int      = 0
     var selectedRowIndex     = 0
 
-    override func viewDidLoad() {
-        super.viewDidLoad()
-
-        self.reloadData(1)
-    }
-    
     func reloadData(page: Int) {
 
-        let url            = NSURL(string:"http://frustration.me/api/public_timeline?page=\(page)")!
-        let request        = NSURLRequest(URL: url)
-
-         NSURLConnection.sendAsynchronousRequest(request, queue: NSOperationQueue.mainQueue()) { (response: NSURLResponse?, data: NSData?, error: NSError?) -> Void in
-
+        let url = NSURL(string:"http://frustration.me/api/public_timeline?page=\(page)")!
+        let request = NSMutableURLRequest(URL: url)
+        request.HTTPMethod = "GET"
+        
+        let task = NSURLSession.sharedSession().dataTaskWithRequest(request) { (data, response, error) -> Void in
             let json = try! NSJSONSerialization.JSONObjectWithData(
                 data!,
                 options: NSJSONReadingOptions.MutableContainers) as! NSDictionary
-
+            
             let items = json["items"] as! Array<Dictionary<String, AnyObject>> // as NSArray
-
+            
             for item in items {
                 self.data.addObject(item)
             }
-
+            
             self.currentPage = json.objectForKey("paginator")!.objectForKey("current_page") as! Int
             print("current page = \(self.currentPage)")
-
-            self.tableView.reloadData()
+            
+            dispatch_async(dispatch_get_main_queue(), {
+                self.tableView.reloadData()
+            })
+            
             self.loading = false
+            
         }
+        
+        task.resume()
 
     }
     
@@ -54,17 +54,12 @@ class TableViewController: UITableViewController {
         // bottom?
         if self.tableView.contentOffset.y >= (self.tableView.contentSize.height - self.tableView.bounds.size.height) {
 
-            let q_global: dispatch_queue_t = dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0);
-
             if self.loading == true {
                 return
             }
 
             self.loading = true
-
-            dispatch_async(q_global, {
-                self.reloadData(self.currentPage + 1)
-            })
+            self.reloadData(self.currentPage + 1)
 
         }
     }
@@ -83,7 +78,6 @@ class TableViewController: UITableViewController {
         cell.nameLabel.text      = self.data[indexPath.row]["title"] as? String
 
         let q_global: dispatch_queue_t = dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0);
-        let q_main: dispatch_queue_t   = dispatch_get_main_queue();
         
         dispatch_async(q_global, {
             let stringURL         = self.data[indexPath.row]["image_l"] as! String
@@ -91,7 +85,7 @@ class TableViewController: UITableViewController {
             let imageData = NSData(contentsOfURL: imageURL)!
             let image = self.resizeImage(UIImage(data: imageData)!, rect: CGRect(x: 0, y: 0, width: cell.frame.size.width, height: cell.frame.size.height))
             
-            dispatch_async(q_main, {
+            dispatch_async(dispatch_get_main_queue(), {
                 
                 cell.mainImageView.image = image;
                 print("titleLabel = \(cell.nameLabel.text)")
@@ -104,7 +98,6 @@ class TableViewController: UITableViewController {
     }
     
     override func tableView(tableView: UITableView, willSelectRowAtIndexPath indexPath: NSIndexPath) -> NSIndexPath? {
-        print("willselect \(indexPath.row)")
         self.selectedRowIndex = indexPath.row
         return indexPath
     }
