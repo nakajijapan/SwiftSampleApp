@@ -13,6 +13,7 @@ class TableViewController: UITableViewController {
     var data:NSMutableArray  = NSMutableArray()
     var loading:Bool         = false
     var currentPage:Int      = 1
+    var selectedRowIndex     = 0
 
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -54,7 +55,6 @@ class TableViewController: UITableViewController {
         if self.tableView.contentOffset.y >= (self.tableView.contentSize.height - self.tableView.bounds.size.height) {
 
             let q_global: dispatch_queue_t = dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0);
-            let q_main: dispatch_queue_t   = dispatch_get_main_queue();
 
             if self.loading == true {
                 return
@@ -63,25 +63,14 @@ class TableViewController: UITableViewController {
             self.loading = true
 
             dispatch_async(q_global, {
-
                 self.reloadData(self.currentPage + 1)
-
-                dispatch_async(q_main, {
-
-                    print("end")
-
-                    })
-                })
+            })
 
         }
     }
 
     // MARK: - UITableViewDataSource
 
-    override func tableView(tableView: UITableView, sectionForSectionIndexTitle title: String, atIndex index: Int) -> Int  {
-        return 0
-    }
-    
     override func tableView(tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         return self.data.count
     }
@@ -96,11 +85,10 @@ class TableViewController: UITableViewController {
         let q_global: dispatch_queue_t = dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0);
         let q_main: dispatch_queue_t   = dispatch_get_main_queue();
         
-        
         dispatch_async(q_global, {
             let stringURL         = self.data[indexPath.row]["image_l"] as! String
-            let imageURL: NSURL   = NSURL(string: stringURL)!
-            let imageData: NSData = NSData(contentsOfURL: imageURL)!
+            let imageURL = NSURL(string: stringURL)!
+            let imageData = NSData(contentsOfURL: imageURL)!
             let image = self.resizeImage(UIImage(data: imageData)!, rect: CGRect(x: 0, y: 0, width: cell.frame.size.width, height: cell.frame.size.height))
             
             dispatch_async(q_main, {
@@ -115,8 +103,10 @@ class TableViewController: UITableViewController {
         return cell;
     }
     
-    override func tableView(tableView: UITableView, titleForHeaderInSection section: Int) -> String {
-        return ""
+    override func tableView(tableView: UITableView, willSelectRowAtIndexPath indexPath: NSIndexPath) -> NSIndexPath? {
+        print("willselect \(indexPath.row)")
+        self.selectedRowIndex = indexPath.row
+        return indexPath
     }
     
     // MARK: - Private
@@ -129,5 +119,16 @@ class TableViewController: UITableViewController {
         UIGraphicsEndImageContext();
 
         return resizedImage
+    }
+    
+    // MARK: - Segue
+    
+    override func prepareForSegue(segue: UIStoryboardSegue, sender: AnyObject?) {
+        
+        if segue.identifier == "showDetail" {
+            let selectedItem = self.data[selectedRowIndex] as! Dictionary<String, AnyObject>
+            let viewController = segue.destinationViewController as! DetailViewController
+            viewController.item = selectedItem
+        }
     }
 }
