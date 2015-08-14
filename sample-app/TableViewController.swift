@@ -25,21 +25,20 @@ class TableViewController: UITableViewController {
         let url            = NSURL(string:"http://frustration.me/api/public_timeline?page=\(page)")!
         let request        = NSURLRequest(URL: url)
 
-         NSURLConnection.sendAsynchronousRequest(request, queue: NSOperationQueue.mainQueue()) { (response: NSURLResponse!, data: NSData!, error: NSError!) -> Void in
+         NSURLConnection.sendAsynchronousRequest(request, queue: NSOperationQueue.mainQueue()) { (response: NSURLResponse?, data: NSData?, error: NSError?) -> Void in
 
-            var json = NSJSONSerialization.JSONObjectWithData(
-                data,
-                options: NSJSONReadingOptions.MutableContainers,
-                error: nil) as! NSDictionary
+            let json = try! NSJSONSerialization.JSONObjectWithData(
+                data!,
+                options: NSJSONReadingOptions.MutableContainers) as! NSDictionary
 
-            var items = json["items"] as! Array<Dictionary<String, AnyObject>> // as NSArray
+            let items = json["items"] as! Array<Dictionary<String, AnyObject>> // as NSArray
 
             for item in items {
                 self.data.addObject(item)
             }
 
             self.currentPage = json.objectForKey("paginator")!.objectForKey("current_page") as! Int
-            println("current page = \(self.currentPage)")
+            print("current page = \(self.currentPage)")
 
             self.tableView.reloadData()
             self.loading = false
@@ -54,8 +53,8 @@ class TableViewController: UITableViewController {
         // bottom?
         if self.tableView.contentOffset.y >= (self.tableView.contentSize.height - self.tableView.bounds.size.height) {
 
-            var q_global: dispatch_queue_t = dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0);
-            var q_main: dispatch_queue_t   = dispatch_get_main_queue();
+            let q_global: dispatch_queue_t = dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0);
+            let q_main: dispatch_queue_t   = dispatch_get_main_queue();
 
             if self.loading == true {
                 return
@@ -69,7 +68,7 @@ class TableViewController: UITableViewController {
 
                 dispatch_async(q_main, {
 
-                    println("end")
+                    print("end")
 
                     })
                 })
@@ -89,25 +88,25 @@ class TableViewController: UITableViewController {
     
     override func tableView(tableView: UITableView, cellForRowAtIndexPath indexPath: NSIndexPath) -> UITableViewCell {
 
-        var cell: TableViewCell = self.tableView.dequeueReusableCellWithIdentifier("Cell") as! TableViewCell
+        let cell: TableViewCell = self.tableView.dequeueReusableCellWithIdentifier("Cell") as! TableViewCell
         
         cell.mainImageView.image = nil
         cell.nameLabel.text      = self.data[indexPath.row]["title"] as? String
 
-        var q_global: dispatch_queue_t = dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0);
-        var q_main: dispatch_queue_t   = dispatch_get_main_queue();
+        let q_global: dispatch_queue_t = dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0);
+        let q_main: dispatch_queue_t   = dispatch_get_main_queue();
         
         
         dispatch_async(q_global, {
-            var stringURL         = self.data[indexPath.row]["image_l"] as! String
-            var imageURL: NSURL   = NSURL(string: stringURL)!
-            var imageData: NSData = NSData(contentsOfURL: imageURL)!
-            var image = self.resizeImage(UIImage(data: imageData)!, rect: CGRect(x: 0, y: 0, width: cell.frame.size.width, height: cell.frame.size.height))
+            let stringURL         = self.data[indexPath.row]["image_l"] as! String
+            let imageURL: NSURL   = NSURL(string: stringURL)!
+            let imageData: NSData = NSData(contentsOfURL: imageURL)!
+            let image = self.resizeImage(UIImage(data: imageData)!, rect: CGRect(x: 0, y: 0, width: cell.frame.size.width, height: cell.frame.size.height))
             
             dispatch_async(q_main, {
                 
                 cell.mainImageView.image = image;
-                println("titleLabel = \(cell.nameLabel.text)")
+                print("titleLabel = \(cell.nameLabel.text)")
 
                 })
 
